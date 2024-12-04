@@ -9,21 +9,45 @@ import (
 )
 
 func Run() {
+	solvePt1()
+	solvePt2()
+}
+
+func solvePt1() {
 	scanner := util.Scanner("day2")
 	var safe int
 	for scanner.Scan() {
-		line := scanner.Text()
-		splits := strings.Split(line, " ")
-		size := len(splits)
-		nums := make([]int, size)
-		for i, s := range splits {
-			nums[i], _ = strconv.Atoi(s)
-		}
+		nums, size := getNums(scanner.Text())
 		if isSafe(nums, size) {
 			safe++
 		}
 	}
-	fmt.Println("Safe:", safe)
+	fmt.Println("Pt1 safe:", safe)
+}
+
+func solvePt2() {
+	scanner := util.Scanner("day2")
+	var safe int
+	for scanner.Scan() {
+		nums, size := getNums(scanner.Text())
+		for i := 0; i < size; i++ {
+			if isSafe(makeCopy(nums, i, size)) {
+				safe++
+				break
+			}
+		}
+	}
+	fmt.Println("Pt2 safe:", safe)
+}
+
+func getNums(text string) ([]int, int) {
+	splits := strings.Split(text, " ")
+	size := len(splits)
+	nums := make([]int, size)
+	for i, s := range splits {
+		nums[i], _ = strconv.Atoi(s)
+	}
+	return nums, size
 }
 
 func isSafe(nums []int, size int) bool {
@@ -41,4 +65,10 @@ func unsafeRange(n1, n2 int, desc bool) bool {
 		return n1-n2 < 1 || n1-n2 > 3
 	}
 	return n2-n1 < 1 || n2-n1 > 3
+}
+
+func makeCopy(nums []int, index, size int) ([]int, int) {
+	cp := make([]int, size)
+	copy(cp, nums)
+	return append(cp[:index], cp[index+1:]...), size - 1
 }
