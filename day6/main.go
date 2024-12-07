@@ -15,12 +15,43 @@ const (
 
 func Run() {
 	solvePt1()
+	solvePt2()
+}
+
+func solvePt2() {
+	x, y, grid := fillGrid()
+	fmt.Println()
+	sum := 0
+	for i, row := range grid {
+		for j, char := range row {
+			if char == '.' {
+				a, b := x, y
+				_, _, loop := processMoves(&a, &b, copyGrid(grid, i, j))
+				if loop {
+					sum++
+				}
+			}
+		}
+	}
+	fmt.Println("Pt2 positions is", sum)
+}
+
+func copyGrid(grid []string, i, j int) []string {
+	newGrid := make([]string, len(grid))
+	copy(newGrid, grid)
+	newGrid[i] = newGrid[i][:j] + string('#') + newGrid[i][j+1:]
+	return newGrid
 }
 
 func solvePt1() {
+	x, y, grid := fillGrid()
+	sum, _, _ := processMoves(&x, &y, grid)
+	fmt.Println("Pt1 sum is:", sum+1)
+	fmt.Println("Guard is now at:", x, ",", y)
+}
+
+func fillGrid() (x, y int, grid []string) {
 	scanner := util.Scanner("day6")
-	grid := []string{}
-	var x, y int
 	for i := 0; scanner.Scan(); i++ {
 		line := scanner.Text()
 		for j, char := range line {
@@ -31,13 +62,7 @@ func solvePt1() {
 		}
 		grid = append(grid, line)
 	}
-
-	printTrail(x, y, 0, grid)
-	fmt.Println()
-	sum, facing := processMoves(&x, &y, grid)
-	printTrail(x, y, facing, grid)
-	fmt.Println("Sum is:", sum+1)
-	fmt.Println("Guard is now at:", x, ",", y)
+	return
 }
 
 // Very cursed
@@ -57,8 +82,8 @@ func moveOnce(evalX, evalY int, x, y, sum, facing *int, grid []string) {
 	*x, *y = evalX, evalY
 }
 
-func processMoves(x, y *int, grid []string) (sum int, facing int) {
-	for {
+func processMoves(x, y *int, grid []string) (sum, facing int, loop bool) {
+	for i := 0; i < 9999; i++ {
 		switch facing {
 		case UP:
 			if *x == 0 {
@@ -82,6 +107,7 @@ func processMoves(x, y *int, grid []string) (sum int, facing int) {
 			moveOnce(*x, *y-1, x, y, &sum, &facing, grid)
 		}
 	}
+	return sum, facing, true
 }
 
 // Completely unnecessary but at least you can see it
